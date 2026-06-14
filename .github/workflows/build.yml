@@ -19,26 +19,17 @@ jobs:
         wget -q -O ps3dev.tar.gz "$ASSET_URL"
         sudo tar -xzf ps3dev.tar.gz -C /usr/local/
 
-    - name: Compile SPRX
+        - name: Compile SPRX
       run: |
         # 1. Definisikan path toolchain
         export PS3DEV=/usr/local/ps3dev
         
-        # 2. Paksa PATH agar sistem mengenali ppu-gcc
+        # 2. Paksa PATH agar sistem mengenali ppu-gcc dan make_self_npdrm
         export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PS3DEV/spu/bin:$PATH
         
-        # 3. MENCARI SEMUA FOLDER INCLUDE (Termasuk psl1ght yang krusial)
-        # Kita tambahkan include psl1ght secara eksplisit
-        PSL1GHT_INCLUDE="-I/usr/local/ps3dev/psl1ght/include"
-        INCLUDE_FLAGS=$(find $PS3DEV -name include -type d | sed 's/^/-I/')
-        
-        # Gabungkan semuanya
-        export CFLAGS="$PSL1GHT_INCLUDE $INCLUDE_FLAGS"
-        
-        echo "Menggunakan CFLAGS: $CFLAGS"
-        
-        # 4. Jalankan make
-        make CFLAGS="$CFLAGS"
+        # 3. Jalankan make murni
+        make
+
 
     - name: Upload Plugin SPRX
       uses: actions/upload-artifact@v4
