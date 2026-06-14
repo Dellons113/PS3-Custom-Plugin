@@ -8,8 +8,8 @@ on:
 jobs:
   build-sprx:
     runs-on: ubuntu-latest
-    # MENGGANTI IMAGE DOCKER KE YANG LEBIH STABIL DAN TERSEDIA TAG LATEST-NYA
-    container: bucanero/ps3dev:latest
+    # Menggunakan GitHub Container Registry resmi dari tim PS3DEV
+    container: ghcr.io/ps3dev/ps3dev:ubuntu-latest
 
     steps:
     - name: Checkout Source Code
