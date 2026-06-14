@@ -13,30 +13,38 @@ jobs:
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    - name: Install Dependencies
+    - name: Install System Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential autoconf automake bison flex libelf-dev libssl-dev texinfo zlib1g-dev
+        sudo apt-get install -y build-essential autoconf automake bison flex libelf-dev libssl-dev texinfo zlib1g-dev libtool pkg-config
+
+    - name: Prepare Environment
+      run: |
+        # Membuat folder target dan memberikan akses penuh
+        sudo mkdir -p /usr/local/ps3dev
+        sudo chown -R $USER:$USER /usr/local/ps3dev
+        
+        # Set environment variable agar skrip toolchain mendeteksi lokasi
+        echo "PS3DEV=/usr/local/ps3dev" >> $GITHUB_ENV
+        echo "PSL1GHT=/usr/local/ps3dev/psl1ght" >> $GITHUB_ENV
+        echo "/usr/local/ps3dev/bin" >> $GITHUB_PATH
 
     - name: Build and Install PS3 Toolchain
       run: |
-        # Menggunakan repositori resmi ps3dev/ps3toolchain
         git clone https://github.com/ps3dev/ps3toolchain.git /tmp/ps3toolchain
         cd /tmp/ps3toolchain
         
-        # Ekspor lokasi instalasi
+        # Ekspor variabel untuk sesi shell saat ini
         export PS3DEV=/usr/local/ps3dev
-        export PATH=$PS3DEV/bin:$PATH
+        export PSL1GHT=/usr/local/ps3dev/psl1ght
         
-        # Jalankan skrip toolchain (ini akan mengompilasi dari source)
-        # Note: Ini mungkin memakan waktu beberapa menit
+        # Jalankan skrip toolchain
         ./toolchain.sh
         
     - name: Compile SPRX
       run: |
         export PS3DEV=/usr/local/ps3dev
         export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PS3DEV/spu/bin:$PATH
-        
         make
 
     - name: Upload Plugin SPRX
