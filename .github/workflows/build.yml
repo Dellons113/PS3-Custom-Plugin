@@ -13,38 +13,32 @@ jobs:
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    - name: Download and Install PS3 Toolchain
+    - name: Install Dependencies
       run: |
-        # 1. Unduh dan pasang compiler utama
-        wget -q -O ps3dev.tar.gz "https://github.com/bucanero/ps3toolchain/releases/download/ubuntu-latest-fad3b5fb/ps3dev-ubuntu-latest-2020-08-31.tar.gz"
-        sudo tar -xzf ps3dev.tar.gz -C /usr/local/
+        sudo apt-get update
+        sudo apt-get install -y build-essential autoconf automake bison flex libelf-dev libssl-dev texinfo zlib1g-dev
+
+    - name: Build and Install PS3 Toolchain
+      run: |
+        # Menggunakan repositori resmi ps3dev/ps3toolchain
+        git clone https://github.com/ps3dev/ps3toolchain.git /tmp/ps3toolchain
+        cd /tmp/ps3toolchain
         
-        # 2. Setup environment untuk kompilasi PSL1GHT
+        # Ekspor lokasi instalasi
         export PS3DEV=/usr/local/ps3dev
-        export PSL1GHT=/usr/local/ps3dev/psl1ght
-        export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PATH
+        export PATH=$PS3DEV/bin:$PATH
         
-        # 3. Clone dan kompilasi PSL1GHT dengan path yang benar
-        git clone https://github.com/ps3dev/psl1ght.git /tmp/psl1ght
-        cd /tmp/psl1ght
+        # Jalankan skrip toolchain (ini akan mengompilasi dari source)
+        # Note: Ini mungkin memakan waktu beberapa menit
+        ./toolchain.sh
         
-        # Ekspor variabel ke environment agar Makefile tidak komplain
-        export PSL1GHT=$PS3DEV/psl1ght
-        
-        # Kompilasi
-        make
-        sudo make install
-
-
     - name: Compile SPRX
       run: |
         export PS3DEV=/usr/local/ps3dev
         export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PS3DEV/spu/bin:$PATH
         
-        # Sekarang seharusnya header sudah ada di /usr/local/ps3dev/psl1ght/include
-        # Kita jalankan make langsung
         make
-        
+
     - name: Upload Plugin SPRX
       uses: actions/upload-artifact@v4
       with:
