@@ -18,21 +18,10 @@ jobs:
         set -e
         sudo apt-get update
         sudo apt-get install -y \
-          libtool \
-          libtool-bin \
-          build-essential \
-          autoconf \
-          automake \
-          bison \
-          flex \
-          libelf-dev \
-          libssl-dev \
-          texinfo \
-          zlib1g-dev \
-          pkg-config \
-          git \
-          wget
-        which libtool || { echo "libtool tidak ditemukan!"; exit 1; }
+          libtool libtool-bin build-essential autoconf automake \
+          bison flex libelf-dev libssl-dev texinfo zlib1g-dev \
+          pkg-config git wget
+        which libtool || { echo "libtool gagal diinstal"; exit 1; }
 
     - name: Prepare Environment
       run: |
@@ -48,16 +37,26 @@ jobs:
     - name: Build and Install PS3 Toolchain
       run: |
         set -e
+        # Clone repo
         git clone --recursive https://github.com/ps3dev/ps3toolchain.git /tmp/ps3toolchain
         cd /tmp/ps3toolchain
+        
+        # Pre-seeding file yang sering menyebabkan timeout
         mkdir -p archives
-        wget -O archives/config.guess "https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.guess"
-        wget -O archives/config.sub "https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.sub"
+        wget -q -O archives/config.guess "https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.guess"
+        wget -q -O archives/config.sub "https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.sub"
+        
+        # Jalankan build dengan path yang benar
+        export PS3DEV=/usr/local/ps3dev
+        export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PS3DEV/spu/bin:$PATH
         ./toolchain.sh
 
     - name: Compile SPRX
       run: |
         set -e
+        # Pastikan path tersedia kembali di shell ini
+        export PS3DEV=/usr/local/ps3dev
+        export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PS3DEV/spu/bin:$PATH
         make
 
     - name: Upload Plugin SPRX
