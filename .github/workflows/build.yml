@@ -16,8 +16,12 @@ jobs:
     - name: Install System Dependencies
       run: |
         sudo apt-get update
-        # Menggabungkan semua instalasi dalam satu perintah untuk resolusi dependensi yang benar
-        sudo apt-get install -y libtool build-essential autoconf automake bison flex libelf-dev libssl-dev texinfo zlib1g-dev pkg-config
+        # Retry logic untuk memastikan semua dependencies terinstall dengan baik
+        sudo apt-get install -y libtool build-essential autoconf automake bison flex libelf-dev libssl-dev texinfo zlib1g-dev pkg-config || {
+          echo "First attempt failed, retrying..."
+          sudo apt-get update
+          sudo apt-get install -y libtool build-essential autoconf automake bison flex libelf-dev libssl-dev texinfo zlib1g-dev pkg-config
+        }
         # Verifikasi akhir untuk memastikan libtool benar-benar ada
         which libtool || { echo "libtool not found"; exit 1; }
 
@@ -41,6 +45,7 @@ jobs:
         git clone https://github.com/ps3dev/ps3toolchain.git /tmp/ps3toolchain
         cd /tmp/ps3toolchain
         # Menjalankan skrip instalasi toolchain
+        chmod +x toolchain.sh
         ./toolchain.sh
 
     - name: Compile SPRX
