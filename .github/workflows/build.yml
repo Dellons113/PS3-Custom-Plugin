@@ -27,13 +27,17 @@ jobs:
         # 2. Paksa PATH agar sistem mengenali ppu-gcc
         export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PS3DEV/spu/bin:$PATH
         
-        # 3. Cari folder include secara otomatis
+        # 3. MENCARI SEMUA FOLDER INCLUDE (Termasuk psl1ght yang krusial)
+        # Kita tambahkan include psl1ght secara eksplisit
+        PSL1GHT_INCLUDE="-I/usr/local/ps3dev/psl1ght/include"
         INCLUDE_FLAGS=$(find $PS3DEV -name include -type d | sed 's/^/-I/')
-        export CFLAGS=$(echo $INCLUDE_FLAGS | tr '\n' ' ')
         
-        echo "PATH saat ini: $PATH"
+        # Gabungkan semuanya
+        export CFLAGS="$PSL1GHT_INCLUDE $INCLUDE_FLAGS"
         
-        # 4. Jalankan make dengan environment yang sudah lengkap
+        echo "Menggunakan CFLAGS: $CFLAGS"
+        
+        # 4. Jalankan make
         make CFLAGS="$CFLAGS"
 
     - name: Upload Plugin SPRX
