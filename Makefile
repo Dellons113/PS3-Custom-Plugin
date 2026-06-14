@@ -1,28 +1,14 @@
-CELL_MK_DIR = $(PS3DEV)/ppu/lv2/include/ppu
+# Pastikan variabel ini menggunakan CFLAGS yang kita kirim dari GitHub Actions
+CC = ppu-gcc
+CFLAGS += -O2 -Wall -fno-builtin -fno-exceptions -ffunction-sections -fdata-sections
+LDFLAGS = -T $(PS3DEV)/ppu/lib/prx.ld -nostartfiles -nostdlib -nodefaultlibs -Wl,-q -Wl,--gc-sections
 
-PRX_DIR		= .
-OUTNAME		= custom_plugin
-CC			= ppu-gcc
-CXX			= ppu-g++
-LD			= ppu-ld
-OBJCOPY		= ppu-objcopy
+all: custom_plugin.sprx
 
-CFLAGS		= -O2 -Wall -I. -fno-builtin -fno-exceptions -ffunction-sections -fdata-sections
-LDFLAGS		= -T $(CELL_MK_DIR)/prx.ld -nostartfiles -nostdlib -nodefaultlibs -Wl,-q -Wl,--gc-sections
+custom_plugin.sprx: main.o
+	$(CC) $(LDFLAGS) -o custom_plugin.elf main.o -lio
+	ppu-objcopy -O binary custom_plugin.elf custom_plugin.prx
+	make_self_npdrm custom_plugin.prx custom_plugin.sprx
 
-OBJS		= main.o
-
-all: $(OUTNAME).prx
-
-$(OUTNAME).prx: $(OUTNAME).elf
-	$(OBJCOPY) -O binary $< $@
-	make_self_npdrm $@ $(OUTNAME).sprx
-
-$(OUTNAME).elf: $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS)
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-clean:
-	rm -f *.o *.elf *.prx *.sprx
+main.o: main.c
+	$(CC) $(CFLAGS) -c main.c -o main.o
