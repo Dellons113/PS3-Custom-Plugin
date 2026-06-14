@@ -13,34 +13,28 @@ jobs:
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    - name: Download and Install PS3 Toolchain Natively
+    - name: Download and Install PS3 Toolchain
       run: |
-        # Mengambil URL rilis toolchain secara dinamis dari repositori Bucanero
-        ASSET_URL=$(curl -s https://api.github.com/repos/bucanero/ps3toolchain/releases/latest | grep "browser_download_url.*ubuntu.*\.tar\.gz" | head -n 1 | cut -d '"' -f 4)
-        
-        # Link cadangan mutlak jika API GitHub mengembalikan nilai kosong
-        if [ -z "$ASSET_URL" ]; then
-          echo "API limit terdeteksi, menggunakan link rilis cadangan..."
-          ASSET_URL="https://github.com/bucanero/ps3toolchain/releases/download/ubuntu-latest-fad3b5fb/ps3dev-ubuntu-latest-2020-08-31.tar.gz"
-        fi
-        
-        echo "Mulai mengunduh toolchain dari: $ASSET_URL"
-        wget -O ps3dev.tar.gz "$ASSET_URL"
-        
-        echo "Mengekstrak toolchain ke dalam sistem..."
+        # Mengunduh toolchain ke folder /usr/local
+        ASSET_URL="https://github.com/bucanero/ps3toolchain/releases/download/ubuntu-latest-fad3b5fb/ps3dev-ubuntu-latest-2020-08-31.tar.gz"
+        wget -q -O ps3dev.tar.gz "$ASSET_URL"
         sudo tar -xzf ps3dev.tar.gz -C /usr/local/
 
-    - name: Configure Environment and PATH
+    - name: Configure Environment and Paths
       run: |
         echo "PS3DEV=/usr/local/ps3dev" >> $GITHUB_ENV
         echo "PSL1GHT=/usr/local/ps3dev/psl1ght" >> $GITHUB_ENV
+        # Menambahkan path compiler ke sistem
         echo "/usr/local/ps3dev/bin" >> $GITHUB_PATH
         echo "/usr/local/ps3dev/ppu/bin" >> $GITHUB_PATH
         echo "/usr/local/ps3dev/spu/bin" >> $GITHUB_PATH
 
     - name: Compile SPRX
       run: |
-        make
+        # Memaksa CFLAGS agar kompiler mengenali lokasi header sistem PS3
+        export CFLAGS="-I/usr/local/ps3dev/ppu/include -I/usr/local/ps3dev/psl1ght/include"
+        # Menjalankan make dengan CFLAGS yang sudah di-export
+        make CFLAGS="$CFLAGS"
 
     - name: Upload Plugin SPRX
       uses: actions/upload-artifact@v4
