@@ -1,0 +1,25 @@
+name: Build Custom VSH Plugin
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-sprx:
+    runs-on: ubuntu-latest
+    container: ps3dev/ps3dev:latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Compile SPRX
+      run: |
+        make
+
+    - name: Upload Plugin SPRX
+      uses: actions/upload-artifact@v4
+      with:
+        name: Custom-Plugin-SPRX
+        path: "*.sprx"
