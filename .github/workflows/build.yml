@@ -15,25 +15,25 @@ jobs:
 
     - name: Download and Install PS3 Toolchain
       run: |
-        # Mengunduh toolchain ke folder /usr/local
         ASSET_URL="https://github.com/bucanero/ps3toolchain/releases/download/ubuntu-latest-fad3b5fb/ps3dev-ubuntu-latest-2020-08-31.tar.gz"
         wget -q -O ps3dev.tar.gz "$ASSET_URL"
         sudo tar -xzf ps3dev.tar.gz -C /usr/local/
 
-    - name: Configure Environment and Paths
-      run: |
-        echo "PS3DEV=/usr/local/ps3dev" >> $GITHUB_ENV
-        echo "PSL1GHT=/usr/local/ps3dev/psl1ght" >> $GITHUB_ENV
-        # Menambahkan path compiler ke sistem
-        echo "/usr/local/ps3dev/bin" >> $GITHUB_PATH
-        echo "/usr/local/ps3dev/ppu/bin" >> $GITHUB_PATH
-        echo "/usr/local/ps3dev/spu/bin" >> $GITHUB_PATH
-
     - name: Compile SPRX
       run: |
-        # Memaksa CFLAGS agar kompiler mengenali lokasi header sistem PS3
-        export CFLAGS="-I/usr/local/ps3dev/ppu/include -I/usr/local/ps3dev/psl1ght/include"
-        # Menjalankan make dengan CFLAGS yang sudah di-export
+        # 1. Menentukan path dasar
+        PS3DEV="/usr/local/ps3dev"
+        
+        # 2. Mencari semua folder 'include' secara otomatis di dalam ps3dev
+        # Ini akan otomatis menemukan sys/ppu_thread.h di manapun ia berada
+        INCLUDE_FLAGS=$(find $PS3DEV -name include -type d | sed 's/^/-I/')
+        
+        # 3. Menggabungkan semua path menjadi satu baris CFLAGS
+        export CFLAGS=$(echo $INCLUDE_FLAGS | tr '\n' ' ')
+        
+        echo "Menggunakan CFLAGS: $CFLAGS"
+        
+        # 4. Menjalankan make dengan CFLAGS hasil pencarian otomatis
         make CFLAGS="$CFLAGS"
 
     - name: Upload Plugin SPRX
