@@ -48,21 +48,28 @@ jobs:
         echo "/usr/local/ps3dev/spu/bin" >> $GITHUB_PATH
 
     - name: Build and Install PS3 Toolchain
-      run: |
-        set -e
-        # Clone repo
-        git clone --recursive https://github.com/ps3dev/ps3toolchain.git /tmp/ps3toolchain
-        cd /tmp/ps3toolchain
-        
-        # Pastikan direktori archives ada
-        mkdir -p archives
-        
-        # FIX: Menggunakan mirror GCC di GitHub yang jauh lebih stabil daripada Savannah
-        wget -O archives/config.guess "https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.guess"
-        wget -O archives/config.sub "https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.sub"
-        
-        # Jalankan skrip instalasi
-        ./toolchain.sh
+  run: |
+    set -e
+    # Clone repo with full history to ensure all files are present
+    git clone --recursive https://github.com/ps3dev/ps3toolchain.git /tmp/ps3toolchain
+    cd /tmp/ps3toolchain
+    
+    # Verify required directories exist
+    if [ ! -d "utils" ]; then
+      echo "ERROR: utils directory not found in ps3toolchain"
+      ls -la
+      exit 1
+    fi
+    
+    # Pastikan direktori archives ada
+    mkdir -p archives
+    
+    # FIX: Menggunakan mirror GCC di GitHub yang jauh lebih stabil daripada Savannah
+    wget -O archives/config.guess "https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.guess"
+    wget -O archives/config.sub "https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.sub"
+    
+    # Jalankan skrip instalasi
+    ./toolchain.sh
 
     - name: Compile SPRX
       run: |
