@@ -15,18 +15,26 @@ jobs:
 
     - name: Download and Install PS3 Toolchain
       run: |
-        # Unduh compiler
+        # 1. Unduh dan pasang compiler utama
         wget -q -O ps3dev.tar.gz "https://github.com/bucanero/ps3toolchain/releases/download/ubuntu-latest-fad3b5fb/ps3dev-ubuntu-latest-2020-08-31.tar.gz"
         sudo tar -xzf ps3dev.tar.gz -C /usr/local/
         
-        # Instal psl1ght secara manual agar header lengkap
-        # Kita clone dari repository resmi agar folder 'sys' tersedia
-        git clone https://github.com/ps3dev/psl1ght.git /tmp/psl1ght
+        # 2. Setup environment untuk kompilasi PSL1GHT
         export PS3DEV=/usr/local/ps3dev
+        export PSL1GHT=/usr/local/ps3dev/psl1ght
         export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PATH
         
+        # 3. Clone dan kompilasi PSL1GHT dengan path yang benar
+        git clone https://github.com/ps3dev/psl1ght.git /tmp/psl1ght
         cd /tmp/psl1ght
-        make && sudo make install
+        
+        # Ekspor variabel ke environment agar Makefile tidak komplain
+        export PSL1GHT=$PS3DEV/psl1ght
+        
+        # Kompilasi
+        make
+        sudo make install
+
 
     - name: Compile SPRX
       run: |
