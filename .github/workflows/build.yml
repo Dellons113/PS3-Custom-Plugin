@@ -8,8 +8,8 @@ on:
 jobs:
   build-sprx:
     runs-on: ubuntu-latest
-    # Menggunakan tag OS spesifik: ubuntu-latest
-    container: ghcr.io/ps3dev/ps3toolchain:ubuntu-latest
+    # Menggunakan image ps3toolchain dari Docker Hub Publik
+    container: ps3dev/ps3toolchain:latest
 
     steps:
     - name: Checkout Source Code
