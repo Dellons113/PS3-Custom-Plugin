@@ -16,26 +16,15 @@ jobs:
     - name: Install System Dependencies
       run: |
         sudo apt-get update
-        # Retry logic untuk memastikan semua dependencies terinstall dengan baik
-        sudo apt-get install -y libtool build-essential autoconf automake bison flex libelf-dev libssl-dev texinfo zlib1g-dev pkg-config || {
-          echo "First attempt failed, retrying..."
-          sudo apt-get update
-          sudo apt-get install -y libtool build-essential autoconf automake bison flex libelf-dev libssl-dev texinfo zlib1g-dev pkg-config
-        }
-        # Verifikasi akhir untuk memastikan libtool benar-benar ada
+        sudo apt-get install -y libtool build-essential autoconf automake bison flex libelf-dev libssl-dev texinfo zlib1g-dev pkg-config
         which libtool || { echo "libtool not found"; exit 1; }
 
     - name: Prepare Environment
       run: |
-        # Membuat direktori dan memberikan akses penuh
         sudo mkdir -p /usr/local/ps3dev
         sudo chown -R $USER:$USER /usr/local/ps3dev
-        
-        # Persist variabel ke semua langkah berikutnya via GITHUB_ENV
         echo "PS3DEV=/usr/local/ps3dev" >> $GITHUB_ENV
         echo "PSL1GHT=/usr/local/ps3dev/psl1ght" >> $GITHUB_ENV
-        
-        # Menambahkan ke PATH sistem via GITHUB_PATH
         echo "/usr/local/ps3dev/bin" >> $GITHUB_PATH
         echo "/usr/local/ps3dev/ppu/bin" >> $GITHUB_PATH
         echo "/usr/local/ps3dev/spu/bin" >> $GITHUB_PATH
@@ -44,13 +33,16 @@ jobs:
       run: |
         git clone https://github.com/ps3dev/ps3toolchain.git /tmp/ps3toolchain
         cd /tmp/ps3toolchain
-        # Menjalankan skrip instalasi toolchain
         chmod +x toolchain.sh
-        ./toolchain.sh
+        PS3DEV=${{ env.PS3DEV }} ./toolchain.sh
+      timeout-minutes: 120
 
     - name: Compile SPRX
       run: |
-        # Make sekarang akan mendeteksi compiler karena PATH sudah di-update
+        export PS3DEV=${{ env.PS3DEV }}
+        export PSL1GHT=${{ env.PSL1GHT }}
+        export PATH=${{ env.PATH }}:/usr/local/ps3dev/bin:/usr/local/ps3dev/ppu/bin:/usr/local/ps3dev/spu/bin
+        [ -f Makefile ] || { echo "Makefile not found"; exit 1; }
         make
 
     - name: Upload Plugin SPRX
