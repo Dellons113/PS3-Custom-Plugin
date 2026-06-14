@@ -15,29 +15,28 @@ jobs:
 
     - name: Download and Install PS3 Toolchain
       run: |
-        ASSET_URL="https://github.com/bucanero/ps3toolchain/releases/download/ubuntu-latest-fad3b5fb/ps3dev-ubuntu-latest-2020-08-31.tar.gz"
-        wget -q -O ps3dev.tar.gz "$ASSET_URL"
+        # Unduh compiler
+        wget -q -O ps3dev.tar.gz "https://github.com/bucanero/ps3toolchain/releases/download/ubuntu-latest-fad3b5fb/ps3dev-ubuntu-latest-2020-08-31.tar.gz"
         sudo tar -xzf ps3dev.tar.gz -C /usr/local/
+        
+        # Instal psl1ght secara manual agar header lengkap
+        # Kita clone dari repository resmi agar folder 'sys' tersedia
+        git clone https://github.com/ps3dev/psl1ght.git /tmp/psl1ght
+        export PS3DEV=/usr/local/ps3dev
+        export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PATH
+        
+        cd /tmp/psl1ght
+        make && sudo make install
 
     - name: Compile SPRX
       run: |
-        # 1. Set Path Lingkungan
         export PS3DEV=/usr/local/ps3dev
         export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PS3DEV/spu/bin:$PATH
         
-        # 2. Deteksi otomatis lokasi header psl1ght yang krusial
-        # Kita cari folder yang mengandung 'ppu_thread.h' agar tidak salah jalur
-        PSL1GHT_PATH=$(find $PS3DEV -name "ppu_thread.h" | head -n 1 | xargs dirname | xargs dirname)
+        # Sekarang seharusnya header sudah ada di /usr/local/ps3dev/psl1ght/include
+        # Kita jalankan make langsung
+        make
         
-        echo "PSL1GHT ditemukan di: $PSL1GHT_PATH"
-        
-        # 3. Masukkan ke dalam CFLAGS agar makefile mengenali path tersebut
-        # Kita tambahkan juga path standar ppu/include
-        export CFLAGS="-I$PSL1GHT_PATH/include -I$PS3DEV/ppu/include -I."
-        
-        # 4. Jalankan make
-        make CFLAGS="$CFLAGS"
-
     - name: Upload Plugin SPRX
       uses: actions/upload-artifact@v4
       with:
