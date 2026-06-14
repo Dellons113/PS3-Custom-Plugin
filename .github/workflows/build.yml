@@ -54,12 +54,12 @@ jobs:
         git clone --recursive https://github.com/ps3dev/ps3toolchain.git /tmp/ps3toolchain
         cd /tmp/ps3toolchain
         
-        # FIX: Manual Seeding file yang sering gagal diunduh
-        # Kita buat direktori archives agar script tidak error
+        # Pastikan direktori archives ada
         mkdir -p archives
-        # Download langsung dari repository git resmi GNU (lebih stabil)
-        wget -O archives/config.guess "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD"
-        wget -O archives/config.sub "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD"
+        
+        # FIX: Menggunakan mirror GCC di GitHub yang jauh lebih stabil daripada Savannah
+        wget -O archives/config.guess "https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.guess"
+        wget -O archives/config.sub "https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.sub"
         
         # Jalankan skrip instalasi
         ./toolchain.sh
@@ -67,6 +67,7 @@ jobs:
     - name: Compile SPRX
       run: |
         set -e
+        # Pastikan kita berada di root directory project
         make
 
     - name: Upload Plugin SPRX
