@@ -8,7 +8,8 @@ on:
 jobs:
   build-sprx:
     runs-on: ubuntu-latest
-    container: ps3dev/ps3dev:latest
+    # MENGGANTI IMAGE DOCKER KE YANG LEBIH STABIL DAN TERSEDIA TAG LATEST-NYA
+    container: bucanero/ps3dev:latest
 
     steps:
     - name: Checkout Source Code
