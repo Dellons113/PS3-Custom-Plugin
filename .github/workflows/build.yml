@@ -8,8 +8,8 @@ on:
 jobs:
   build-sprx:
     runs-on: ubuntu-latest
-    # Menggunakan GitHub Container Registry resmi dari tim PS3DEV
-    container: ghcr.io/ps3dev/ps3dev:ubuntu-latest
+    # Menggunakan image ps3toolchain terbaru dari tim PS3DEV di GitHub
+    container: ghcr.io/ps3dev/ps3toolchain:latest
 
     steps:
     - name: Checkout Source Code
