@@ -13,10 +13,10 @@ jobs:
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    - name: Install System Dependencies
+        - name: Install System Dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y libtool build-essential autoconf automake bison flex libelf-dev libssl-dev texinfo zlib1g-dev pkg-config
+        for i in {1..3}; do sudo apt-get update && break || sleep 10; done
+        for i in {1..3}; do sudo apt-get install -y libtool build-essential autoconf automake bison flex libelf-dev libssl-dev texinfo zlib1g-dev pkg-config && break || sleep 10; done
         which libtool || { echo "libtool not found"; exit 1; }
 
     - name: Prepare Environment
