@@ -19,17 +19,11 @@ jobs:
         wget -q -O ps3dev.tar.gz "$ASSET_URL"
         sudo tar -xzf ps3dev.tar.gz -C /usr/local/
 
-        - name: Compile SPRX
+    - name: Compile SPRX
       run: |
-        # 1. Definisikan path toolchain
         export PS3DEV=/usr/local/ps3dev
-        
-        # 2. Paksa PATH agar sistem mengenali ppu-gcc dan make_self_npdrm
         export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PS3DEV/spu/bin:$PATH
-        
-        # 3. Jalankan make murni
         make
-
 
     - name: Upload Plugin SPRX
       uses: actions/upload-artifact@v4
