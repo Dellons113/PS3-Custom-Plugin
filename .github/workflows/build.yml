@@ -21,19 +21,19 @@ jobs:
 
     - name: Compile SPRX
       run: |
-        # 1. Menentukan path dasar
-        PS3DEV="/usr/local/ps3dev"
+        # 1. Definisikan path toolchain
+        export PS3DEV=/usr/local/ps3dev
         
-        # 2. Mencari semua folder 'include' secara otomatis di dalam ps3dev
-        # Ini akan otomatis menemukan sys/ppu_thread.h di manapun ia berada
+        # 2. Paksa PATH agar sistem mengenali ppu-gcc
+        export PATH=$PS3DEV/bin:$PS3DEV/ppu/bin:$PS3DEV/spu/bin:$PATH
+        
+        # 3. Cari folder include secara otomatis
         INCLUDE_FLAGS=$(find $PS3DEV -name include -type d | sed 's/^/-I/')
-        
-        # 3. Menggabungkan semua path menjadi satu baris CFLAGS
         export CFLAGS=$(echo $INCLUDE_FLAGS | tr '\n' ' ')
         
-        echo "Menggunakan CFLAGS: $CFLAGS"
+        echo "PATH saat ini: $PATH"
         
-        # 4. Menjalankan make dengan CFLAGS hasil pencarian otomatis
+        # 4. Jalankan make dengan environment yang sudah lengkap
         make CFLAGS="$CFLAGS"
 
     - name: Upload Plugin SPRX
